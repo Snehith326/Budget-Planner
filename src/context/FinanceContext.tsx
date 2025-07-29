@@ -29,6 +29,8 @@ interface FinanceContextType {
   budgets: Budget[];
   roundUpSavings: number;
   addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
+  editTransaction: (id: string, transaction: Omit<Transaction, 'id'>) => void;
+  deleteTransaction: (id: string) => void;
   addSavingsGoal: (goal: Omit<SavingsGoal, 'id'>) => void;
   updateBudget: (category: string, limit: number) => void;
   getExpensesByCategory: () => { [key: string]: number };
@@ -193,6 +195,57 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     };
   };
 
+  const editTransaction = (id: string, transaction: Omit<Transaction, 'id'>) => {
+    // Find the transaction to edit
+    const oldTransaction = transactions.find(t => t.id === id);
+    
+    if (!oldTransaction) return;
+    
+    // Update transactions
+    setTransactions(prev => prev.map(t => 
+      t.id === id ? { ...transaction, id } : t
+    ));
+    
+    // If changing from expense to income or vice versa, or changing category/amount
+    // we need to update budgets accordingly
+    if (oldTransaction.type === 'expense') {
+      // Remove old expense from budget
+      setBudgets(prev => prev.map(budget => 
+        budget.category === oldTransaction.category 
+          ? { ...budget, spent: Math.max(0, budget.spent - oldTransaction.amount) }
+          : budget
+      ));
+    }
+    
+    // Add new expense to budget if applicable
+    if (transaction.type === 'expense') {
+      setBudgets(prev => prev.map(budget => 
+        budget.category === transaction.category 
+          ? { ...budget, spent: budget.spent + transaction.amount }
+          : budget
+      ));
+    }
+  };
+  
+  const deleteTransaction = (id: string) => {
+    // Find the transaction to delete
+    const transaction = transactions.find(t => t.id === id);
+    
+    if (!transaction) return;
+    
+    // Remove transaction
+    setTransactions(prev => prev.filter(t => t.id !== id));
+    
+    // Update budget if it was an expense
+    if (transaction.type === 'expense') {
+      setBudgets(prev => prev.map(budget => 
+        budget.category === transaction.category 
+          ? { ...budget, spent: Math.max(0, budget.spent - transaction.amount) }
+          : budget
+      ));
+    }
+  };
+
   return (
     <FinanceContext.Provider value={{
       transactions,
@@ -200,6 +253,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       budgets,
       roundUpSavings,
       addTransaction,
+      editTransaction,
+      deleteTransaction,
       addSavingsGoal,
       updateBudget,
       getExpensesByCategory,

@@ -87,13 +87,6 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">Welcome back! Here's your financial overview.</p>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
-        >
-          Add Transaction
-        </motion.button>
       </div>
 
       {/* Stats Grid */}
@@ -121,8 +114,20 @@ export default function Dashboard() {
                   {stat.change}
                 </div>
               </div>
-              <div className={`p-3 rounded-xl bg-${stat.color}-100 dark:bg-${stat.color}-900/20`}>
-                <stat.icon className={`w-8 h-8 text-${stat.color}-600`} />
+              <div className={`p-3 rounded-xl ${
+                stat.color === 'emerald' ? 'bg-emerald-100 dark:bg-emerald-900/20' :
+                stat.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/20' :
+                stat.color === 'red' ? 'bg-red-100 dark:bg-red-900/20' :
+                stat.color === 'amber' ? 'bg-amber-100 dark:bg-amber-900/20' :
+                'bg-gray-100 dark:bg-gray-900/20'
+              }`}>
+                <stat.icon className={`w-8 h-8 ${
+                  stat.color === 'emerald' ? 'text-emerald-600' :
+                  stat.color === 'blue' ? 'text-blue-600' :
+                  stat.color === 'red' ? 'text-red-600' :
+                  stat.color === 'amber' ? 'text-amber-600' :
+                  'text-gray-600'
+                }`} />
               </div>
             </div>
           </motion.div>

@@ -19,6 +19,8 @@ export default function Transactions() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterType, setFilterType] = useState('all');
+  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
 
   const categories = ['all', ...new Set(transactions.map(t => t.category))];
   
@@ -59,7 +61,11 @@ export default function Transactions() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={() => {
+              setSelectedTransaction(null);
+              setModalMode('add');
+              setIsAddModalOpen(true);
+            }}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
           >
             <PlusIcon className="w-5 h-5" />
@@ -187,20 +193,34 @@ export default function Transactions() {
                       </div>
                     </div>
                     
-                    <div className="text-right">
-                      <p className={`text-xl font-bold ${
-                        transaction.type === 'income' 
-                          ? 'text-emerald-600' 
-                          : 'text-red-600'
-                      }`}>
-                        {transaction.type === 'income' ? '+' : '-'}₹{transaction.amount.toLocaleString()}
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        {transaction.date.toLocaleTimeString('en-IN', {
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </p>
+                    <div className="flex items-center gap-4">
+                      <button 
+                        onClick={() => {
+                          setSelectedTransaction(transaction);
+                          setModalMode('edit');
+                          setIsAddModalOpen(true);
+                        }}
+                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                        </svg>
+                      </button>
+                      <div className="text-right">
+                        <p className={`text-xl font-bold ${
+                          transaction.type === 'income' 
+                            ? 'text-emerald-600' 
+                            : 'text-red-600'
+                        }`}>
+                          {transaction.type === 'income' ? '+' : '-'}₹{transaction.amount.toLocaleString()}
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                          {transaction.date.toLocaleTimeString('en-IN', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -219,6 +239,8 @@ export default function Transactions() {
       <AddTransactionModal 
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
+        transaction={selectedTransaction}
+        mode={modalMode}
       />
     </motion.div>
   );

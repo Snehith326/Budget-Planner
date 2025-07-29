@@ -20,7 +20,7 @@ export default function Chatbot() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: "Hi! I'm your FinanceAI assistant. I can help you with spending insights, budgeting tips, and financial advice. What would you like to know?",
+      text: "Hi! I'm your PocketPilot assistant. I can help you with spending insights, budgeting tips, and financial advice. What would you like to know?",
       isUser: false,
       timestamp: new Date()
     }
@@ -166,7 +166,7 @@ export default function Chatbot() {
                     🤖
                   </motion.div>
                   <div>
-                    <h3 className="font-semibold">FinanceAI Assistant</h3>
+                    <h3 className="font-semibold">PocketPilot Assistant</h3>
                     <p className="text-sm text-purple-100">Online</p>
                   </div>
                 </div>

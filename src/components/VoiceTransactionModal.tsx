@@ -21,26 +21,43 @@ export default function VoiceTransactionModal({ isOpen, onClose }: VoiceTransact
   const [isProcessing, setIsProcessing] = useState(false);
   const { addTransaction } = useFinance();
 
-  // Simulate speech recognition
+  // Real speech recognition implementation
   const startListening = () => {
     setIsListening(true);
     setTranscript('');
+    setParsedTransaction(null);
     
-    // Simulate listening for 3 seconds
-    setTimeout(() => {
-      const samplePhrases = [
-        "Add ₹500 to food category for lunch",
-        "Deduct ₹150 for transportation uber ride",
-        "Add ₹2500 to savings emergency fund",
-        "Spend ₹800 on shopping clothes",
-        "Income ₹5000 from freelance work"
-      ];
+    // Check if browser supports speech recognition
+    const SpeechRecognition: typeof window.SpeechRecognition = 
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'en-IN';
+      recognition.continuous = false;
+      recognition.interimResults = false;
       
-      const randomPhrase = samplePhrases[Math.floor(Math.random() * samplePhrases.length)];
-      setTranscript(randomPhrase);
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        const transcript = event.results[0][0].transcript;
+        setTranscript(transcript);
+        parseTranscript(transcript);
+      };
+      
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        console.error('Speech recognition error', event.error);
+        setIsListening(false);
+      };
+      
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+      
+      recognition.start();
+    } else {
+      // Fallback for browsers that don't support speech recognition
+      alert('Your browser does not support speech recognition. Please try a different browser.');
       setIsListening(false);
-      parseTranscript(randomPhrase);
-    }, 3000);
+    }
   };
 
   const stopListening = () => {

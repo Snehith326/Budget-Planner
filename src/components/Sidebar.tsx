@@ -60,7 +60,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
                 <BanknotesIcon className="w-5 h-5 text-white" />
               </div>
-              <span className="font-bold text-lg text-gray-900 dark:text-white">FinanceAI</span>
+              <span className="font-bold text-lg text-gray-900 dark:text-white">PocketPilot</span>
             </motion.div>
           )}
         </AnimatePresence>

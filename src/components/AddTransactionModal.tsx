@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useFinance } from '../context/FinanceContext';
@@ -6,9 +6,18 @@ import { useFinance } from '../context/FinanceContext';
 interface AddTransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
+  transaction?: {
+    id: string;
+    amount: number;
+    category: string;
+    description: string;
+    type: 'income' | 'expense';
+    date: Date;
+  };
+  mode?: 'add' | 'edit';
 }
 
-export default function AddTransactionModal({ isOpen, onClose }: AddTransactionModalProps) {
+export default function AddTransactionModal({ isOpen, onClose, transaction, mode = 'add' }: AddTransactionModalProps) {
   const [formData, setFormData] = useState({
     amount: '',
     category: '',
@@ -17,7 +26,20 @@ export default function AddTransactionModal({ isOpen, onClose }: AddTransactionM
     date: new Date().toISOString().split('T')[0]
   });
   
-  const { addTransaction } = useFinance();
+  const { addTransaction, editTransaction } = useFinance();
+  
+  // Initialize form data when in edit mode and transaction changes
+  useEffect(() => {
+    if (transaction && mode === 'edit') {
+      setFormData({
+        amount: transaction.amount.toString(),
+        category: transaction.category,
+        description: transaction.description,
+        type: transaction.type,
+        date: transaction.date.toISOString().split('T')[0]
+      });
+    }
+  }, [transaction, mode]);
 
   const categories = {
     expense: ['Food', 'Transportation', 'Shopping', 'Entertainment', 'Bills', 'Healthcare', 'Education', 'Other'],
@@ -31,13 +53,19 @@ export default function AddTransactionModal({ isOpen, onClose }: AddTransactionM
       return;
     }
 
-    addTransaction({
+    const transactionData = {
       amount: parseFloat(formData.amount),
       category: formData.category,
       description: formData.description,
       type: formData.type,
       date: new Date(formData.date)
-    });
+    };
+
+    if (mode === 'edit' && transaction) {
+      editTransaction(transaction.id, transactionData);
+    } else {
+      addTransaction(transactionData);
+    }
 
     // Reset form and close modal
     setFormData({
@@ -78,7 +106,9 @@ export default function AddTransactionModal({ isOpen, onClose }: AddTransactionM
           >
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Add Transaction</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                {mode === 'edit' ? 'Edit Transaction' : 'Add Transaction'}
+              </h2>
               <button
                 onClick={onClose}
                 className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
@@ -213,7 +243,7 @@ export default function AddTransactionModal({ isOpen, onClose }: AddTransactionM
                   whileTap={{ scale: 0.95 }}
                   className="flex-1 px-4 py-3 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-xl hover:shadow-lg transition-all duration-200"
                 >
-                  Add Transaction
+                  {mode === 'edit' ? 'Save Changes' : 'Add Transaction'}
                 </motion.button>
               </div>
             </form>
